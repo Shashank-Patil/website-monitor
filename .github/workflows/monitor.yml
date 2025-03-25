@@ -1,0 +1,31 @@
+name: Website Monitor
+
+on:
+  schedule:
+    - cron: "*/3 * * * *"  # Runs every 3 minutes
+  workflow_dispatch:  # Allows manual triggering
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set Up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install Dependencies
+        run: pip install requests twilio
+
+      - name: Run Monitor Script
+        env:
+          TWILIO_SID: ${{ secrets.TWILIO_SID }}
+          TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
+          TWILIO_PHONE_NUMBER: ${{ secrets.TWILIO_PHONE_NUMBER }}
+          YOUR_PHONE_NUMBER: ${{ secrets.YOUR_PHONE_NUMBER }}
+          URL: ${{ secrets.URL }}
+        run: python monitor_website.py
