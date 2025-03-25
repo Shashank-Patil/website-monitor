@@ -2,11 +2,12 @@ import requests
 import hashlib
 import time
 import os
-# from dotenv import load_dotenv
 from twilio.rest import Client
 
-# Load environment variables from .env file
-# load_dotenv()
+# Load dotenv only if running locally
+if os.getenv("GITHUB_ACTIONS") is None:
+    from dotenv import load_dotenv
+    load_dotenv()
 
 # Retrieve credentials from environment variables
 TWILIO_SID = os.getenv("TWILIO_SID")
@@ -64,44 +65,31 @@ def send_phone_call():
     except Exception as e:
         print(f"Error making call: {e}")
 
-# # --- Step 1: Initialize Reference Hash If Not Set ---
-# current_content = get_website_content(URL)
 
-# if current_content:
-#     current_hash = hash_content(current_content)
-
-#     if not load_reference_hash():
-#         print("Saving initial reference state...")
-#         save_reference_hash(current_hash)
-#     else:
-#         print("Reference state already set.")
-
-# # --- Step 2: Start Monitoring ---
-# print("Monitoring started...")
-
-# while True:
-#     content = get_website_content(URL)
-    
-#     if content:
-#         current_hash = hash_content(content)
-#         reference_hash = load_reference_hash()
-
-#         if reference_hash and current_hash != reference_hash:
-#             print("Change detected! Calling now...")
-#             send_phone_call()
-#             save_reference_hash(current_hash)  # Update reference state
-        
-#     time.sleep(60)  # Check every 60 seconds
+def create_reference_file():
+    """Creates the reference file only if it doesn't exist (and only when running locally)."""
+    if os.getenv("GITHUB_ACTIONS") is None:  # Ensure this runs only locally
+        if not os.path.exists("reference_hash.txt"):
+            print("🔹 Reference file not found. Creating it now...")
+            reference_content = get_website_content(URL)
+            reference_hash = hash_content(reference_content)
+            with open("reference_hash.txt", "w") as f:
+                f.write(reference_hash)
+            print("✅ Reference file created.")
+        else:
+            print("✅ Reference file already exists.")
 
 def main():
     try:
+        create_reference_file()  # Only runs locally
+
         content = get_website_content(URL)
         current_hash = hash_content(content)
         reference_hash = load_reference_hash()
 
         if reference_hash and current_hash != reference_hash:
             print("Change detected! Calling now...")
-            send_phone_call()
+            #send_phone_call()
         else:
             print("No change detected.")
     
