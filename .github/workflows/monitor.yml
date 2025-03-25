@@ -10,6 +10,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+
+      - name: Check Time and Exit If Between 12 AM - 6 AM IST (6:30 PM - 12:30 AM UTC)
+        run: |
+          CURRENT_HOUR=$(date -u +"%H")  # Get current hour in UTC
+          CURRENT_MINUTE=$(date -u +"%M")  # Get current minute in UTC
+          TIME_IN_MINUTES=$((CURRENT_HOUR * 60 + CURRENT_MINUTE))  # Convert to total minutes
+
+          START_BLOCK_TIME=$((18 * 60 + 30))  # 18:30 UTC in minutes
+          END_BLOCK_TIME=$((0 * 60 + 30))    # 00:30 UTC in minutes
+
+          if [ "$TIME_IN_MINUTES" -ge "$START_BLOCK_TIME" ] || [ "$TIME_IN_MINUTES" -lt "$END_BLOCK_TIME" ]; then
+            echo "⏳ It's between 12 AM - 6 AM IST. Skipping this run."
+            exit 0  # Exit the workflow early
+          fi
+      
       - name: Checkout Repository
         uses: actions/checkout@v4
 
