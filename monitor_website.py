@@ -2,7 +2,6 @@ import requests
 import hashlib
 import time
 import os
-from dotenv import load_dotenv
 from twilio.rest import Client
 
 # Load environment variables from .env file
