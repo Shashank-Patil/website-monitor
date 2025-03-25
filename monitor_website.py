@@ -2,10 +2,11 @@ import requests
 import hashlib
 import time
 import os
+# from dotenv import load_dotenv
 from twilio.rest import Client
 
 # Load environment variables from .env file
-load_dotenv()
+# load_dotenv()
 
 # Retrieve credentials from environment variables
 TWILIO_SID = os.getenv("TWILIO_SID")
