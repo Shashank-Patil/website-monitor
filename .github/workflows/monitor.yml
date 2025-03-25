@@ -1,46 +1,49 @@
-name: Website Monitor
+name: Monitor Website
 
 on:
   schedule:
-    - cron: "*/3 * * * *"  # Runs every 3 minutes
+    - cron: '*/3 * * * *'  # Runs every 3 minutes
   workflow_dispatch:  # Allows manual triggering
 
 jobs:
   monitor:
     runs-on: ubuntu-latest
-
     steps:
-
-      - name: Check Time and Exit If Between 12 AM - 6 AM IST (6:30 PM - 12:30 AM UTC)
+      - name: Check Time and Skip if Between 12 AM - 6 AM IST
+        id: check_time
         run: |
-          CURRENT_HOUR=$(date -u +"%H")  # Get current hour in UTC
-          CURRENT_MINUTE=$(date -u +"%M")  # Get current minute in UTC
-          TIME_IN_MINUTES=$((CURRENT_HOUR * 60 + CURRENT_MINUTE))  # Convert to total minutes
+          CURRENT_HOUR=$(date -u +"%H")
+          CURRENT_MINUTE=$(date -u +"%M")
+          TIME_IN_MINUTES=$((CURRENT_HOUR * 60 + CURRENT_MINUTE))
 
-          START_BLOCK_TIME=$((18 * 60 + 30))  # 18:30 UTC in minutes
-          END_BLOCK_TIME=$((0 * 60 + 30))    # 00:30 UTC in minutes
+          # 12 AM IST = 18:30 UTC, 6 AM IST = 00:30 UTC
+          START_BLOCK_TIME=$((18 * 60 + 30))
+          END_BLOCK_TIME=$((0 * 60 + 30))
 
           if [ "$TIME_IN_MINUTES" -ge "$START_BLOCK_TIME" ] || [ "$TIME_IN_MINUTES" -lt "$END_BLOCK_TIME" ]; then
-            echo "⏳ It's between 12 AM - 6 AM IST. Skipping this run."
-            exit 0  # Exit the workflow early
+            echo "skip=true" >> "$GITHUB_ENV"
           fi
-      
+
+      - name: Skip Remaining Steps if Out of Allowed Time Range
+        if: env.skip == 'true'
+        run: |
+          echo "⏳ Skipping workflow as it's between 12 AM - 6 AM IST."
+          exit 0
+
       - name: Checkout Repository
         uses: actions/checkout@v4
+        if: env.skip != 'true'  # Ensures this step runs only if not skipped
 
       - name: Set Up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
+          python-version: '3.10'
+        if: env.skip != 'true'
 
       - name: Install Dependencies
         run: pip install requests twilio
+        if: env.skip != 'true'
 
-      - name: Run Monitor Script
-        env:
-          TWILIO_SID: ${{ secrets.TWILIO_SID }}
-          TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
-          TWILIO_PHONE_NUMBER: ${{ secrets.TWILIO_PHONE_NUMBER }}
-          YOUR_PHONE_NUMBER: ${{ secrets.YOUR_PHONE_NUMBER }}
-          URL: ${{ secrets.URL }}
+      - name: Run Website Monitor Script
         run: python monitor_website.py
+        if: env.skip != 'true'
