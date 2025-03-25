@@ -95,7 +95,7 @@ def send_phone_call():
 
 def main():
     try:
-        content = get_website_content()
+        content = get_website_content(URL)
         current_hash = hash_content(content)
         reference_hash = load_reference_hash()
 
