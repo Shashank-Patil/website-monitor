@@ -45,5 +45,11 @@ jobs:
         if: env.skip != 'true'
 
       - name: Run Website Monitor Script
+        env:
+            TWILIO_SID: ${{ secrets.TWILIO_SID }}
+            TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
+            TWILIO_PHONE_NUMBER: ${{ secrets.TWILIO_PHONE_NUMBER }}
+            YOUR_PHONE_NUMBER: ${{ secrets.YOUR_PHONE_NUMBER }}
+            URL: ${{ secrets.URL }}
         run: python monitor_website.py
         if: env.skip != 'true'
