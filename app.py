@@ -6,7 +6,7 @@ app = Flask(__name__)
 @app.route('/run-monitor', methods=['GET'])
 def run_monitor():
     try:
-        monitor.main()  # Run your monitoring logic
+        monitor_website.main()  # Run your monitoring logic
         return jsonify({"status": "success", "message": "Monitor executed successfully"}), 200
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
