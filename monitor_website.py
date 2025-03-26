@@ -89,7 +89,7 @@ def main():
 
         if reference_hash and current_hash != reference_hash:
             print("Change detected! Calling now...")
-            #send_phone_call()
+            send_phone_call()
         else:
             print("No change detected.")
     
